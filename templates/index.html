@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Logganalys</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    h1 { margin-bottom: 0.5rem; }
+    form { margin: 1rem 0; }
+    pre { background: #f4f4f4; padding: 1rem; white-space: pre-wrap; }
+    .error { color: #b00020; margin-top: 1rem; }
+    .section { margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <h1>AI Logganalys</h1>
+  <p>Ladda upp en Android-loggfil (.txt / .log). Appen kör regex + spaCy lokalt och försöker sedan skapa en AI-sammanfattning med Gemini (om API-nyckel finns).</p>
+  <form method="POST" enctype="multipart/form-data">
+    <input type="file" name="logfile" required>
+    <button type="submit">Analysera</button>
+  </form>
+
+  {% if error %}
+  <div class="error"><strong>Notis:</strong> {{ error }}</div>
+  {% endif %}
+
+  {% if result_local %}
+  <div class="section">
+    <h2>Resultat (lokal analys)</h2>
+    <pre>{{ result_local }}</pre>
+  </div>
+  {% endif %}
+
+  {% if result_gemini %}
+  <div class="section">
+    <h2>Gemini-sammanfattning</h2>
+    <pre>{{ result_gemini }}</pre>
+  </div>
+  {% endif %}
+</body>
+</html>
