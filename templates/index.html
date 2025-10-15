@@ -60,9 +60,106 @@
       color: #f8f6f6 !important;
 }
 
+      font-family: Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #111;
+      margin: 2rem auto;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0056b3;
+      margin-bottom: 0.5rem;
+    }
+
+    form {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    input[type="file"] {
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 0.5rem 1.2rem;
+      background-color: #0078d7;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      white-space: pre-wrap;
+      max-height: 600px;
+      overflow-y: auto;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .error {
+      color: #b00020;
+      background-color: #ffe5e5;
+      border-left: 5px solid #b00020;
+      padding: 0.7rem;
+      margin-top: 1rem;
+    }
+
+    .section {
+      margin-top: 1.8rem;
+    }
+
+    .highlight-error {
+      color: #b00020;
+      font-weight: bold;
+    }
+
+    .highlight-warning {
+      color: #ff8c00;
+      font-weight: bold;
+    }
+
+    .highlight-success {
+      color: #008000;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      color: #666;
+      font-size: 0.9rem;
     }
   </style>
+  <script>
+    // Färglägg loggrader med nyckelord (client-side)
+    function highlightLogs() {
+      const preBlocks = document.querySelectorAll("pre");
+      preBlocks.forEach(block => {
+        block.innerHTML = block.innerHTML
+          .replace(/(Exception|Error|Fail|Crash|ANR)/gi, '<span class="highlight-error">$1</span>')
+          .replace(/(Success|Completed|OK)/gi, '<span class="highlight-success">$1</span>')
+          .replace(/(Warning|Timeout)/gi, '<span class="highlight-warning">$1</span>');
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", highlightLogs);
+  </script>
 </head>
+
 <body>
   <button class="btn btn-outline-secondary theme-toggle" id="themeToggle">🌙 Mörkt läge</button>
 
