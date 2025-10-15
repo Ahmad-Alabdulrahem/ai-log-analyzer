@@ -1,23 +1,38 @@
 # 🧠 AI Log Analyzer
 
-AI Log Analyzer is a Python-based tool that uses **Google Gemini AI** to analyze Android log files.  
-It helps detect recurring issues, find similar reports, and generate easy-to-understand summaries.  
-The goal is to make error analysis faster and reduce manual work for developers.
+This project is a **Flask-based web application** that uses **Google Gemini AI** and **spaCy** to automatically analyze Android log files.  
+It detects common issues, finds similarities between reports, and generates readable summaries to support developers in debugging.
 
 ---
 
 ## 🚀 Features
-- Analyze Android log files automatically  
-- Identify repeated errors and common patterns  
-- Generate summaries using Gemini AI  
-- Works locally with your own API key  
-- Keeps all credentials secure in `.env`
+- Upload and analyze Android log files through a web interface  
+- AI-powered text analysis using Gemini  
+- Automatic summarization and similarity detection  
+- Clean, modular Flask architecture  
+- Simple HTML/CSS frontend (ready for further development)
 
 ---
 
-## ⚙️ Setup
+## 📦 What to Install
 
-### 1. Clone the repository
+Before running the application, make sure these tools and Python packages are installed:
+
+### 🧰 System Requirements
+| Tool | Recommended Version | Description | Download |
+|------|---------------------|-------------|-----------|
+| **Python** | 3.10 or higher (tested on 3.13) | Required to run the app | [python.org/downloads](https://www.python.org/downloads/) |
+| **pip** | Latest | Python package manager | Comes with Python |
+| **Git** | Latest | For cloning and version control | [git-scm.com/downloads](https://git-scm.com/downloads) |
+
+---
+
+### 🐍 Python Dependencies
+
+All required Python packages are listed in `requirements.txt`.  
+To install everything automatically:
+
 ```bash
-git clone https://github.com/Ahmad-Alabdulrahem/ai-log-analyzer.git
-cd ai-log-analyzer
+pip install -r requirements.txt
+
+python -m spacy download en_core_web_sm
