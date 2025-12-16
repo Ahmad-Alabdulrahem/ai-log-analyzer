@@ -1,232 +1,507 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
   <title>AI Logganalys</title>
-
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
+    /* ===== COLOR THEME ===== */
+    :root {
+      --bg: #eef2ff;
+      --bg-gradient: radial-gradient(circle at top left, #bfdbfe 0, #eef2ff 40%, #f9fafb 80%);
+      --fg: #020617;
+      --muted: #64748b;
+
+      --panel: rgba(255,255,255,0.9);
+      --panel-border: rgba(148,163,184,0.45);
+
+      --primary: #2563eb;
+      --primary-soft: rgba(37,99,235,0.08);
+      --primary-hover: #1d4ed8;
+
+      --pre-bg: rgba(15,23,42,0.03);
+      --pre-fg: #020617;
+      --pre-border: rgba(148,163,184,0.4);
+
+      --error-text: #b91c1c;
+
+      --overlay-bg: rgba(15,23,42,0.7);
+      --shadow-soft: 0 18px 45px rgba(15,23,42,0.12);
+    }
+
+    body.dark {
+      --bg: #020617;
+      --bg-gradient: radial-gradient(circle at top left, #0f172a 0, #020617 50%, #020617 100%);
+      --fg: #e5e7eb;
+      --muted: #9ca3af;
+
+      --panel: rgba(15,23,42,0.9);
+      --panel-border: rgba(55,65,81,0.8);
+
+      --primary: #60a5fa;
+      --primary-soft: rgba(96,165,250,0.18);
+      --primary-hover: #93c5fd;
+
+      --pre-bg: rgba(15,23,42,0.9);
+      --pre-fg: #e5e7eb;
+      --pre-border: rgba(55,65,81,0.9);
+
+      --error-text: #fb7185;
+
+      --overlay-bg: rgba(15,23,42,0.9);
+      --shadow-soft: 0 18px 45px rgba(0,0,0,0.65);
+    }
+
     body {
-      background-color: var(--bs-body-bg);
-      color: var(--bs-body-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    .card {
-      border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-    pre {
-      background: rgba(0, 0, 0, 0.05);
-      padding: 1rem;
-      border-radius: 0.5rem;
-      white-space: pre-wrap;
-    }
-    .theme-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1000;
-    }
-    .dark-theme {
-      --bs-body-bg: #121212;
-      --bs-body-color: #f1f1f1;
-      --bs-card-bg: #1e1e1e;
-      --bs-border-color: #333;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--fg);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* 🔧 Fix för filuppladdning i mörkt läge */
-    .dark-theme input[type="file"] {
-      background-color: #2c2c2c !important;
-      color: #f1f1f1 !important;
-      border: 1px solid #555 !important;
+    .wrap {
+      max-width: 960px;
+      margin: 2.5rem auto 3rem;
+      padding: 0 1.25rem;
     }
 
-    .dark-theme input[type="file"]::file-selector-button {
-      background-color: #007bff !important;
-      color: white !important;
-      border: none;
-      border-radius: 0.3rem;
-      padding: 0.4rem 0.8rem;
-      cursor: pointer;
-    }
-
-    .dark-theme input[type="file"]::file-selector-button:hover {
-      background-color: #0b5ed7 !important;
-      /* Gör beskrivningstexten ljusare i mörkt läge */
-    .dark-theme .text-muted {
-      color: #f8f6f6 !important;
-}
-
-      font-family: Arial, sans-serif;
-      background-color: #f8fafc;
-      color: #111;
-      margin: 2rem auto;
-      max-width: 900px;
-      line-height: 1.5;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
     }
 
     h1 {
-      text-align: center;
-      color: #0056b3;
-      margin-bottom: 0.5rem;
+      margin: 0;
+      font-size: 1.9rem;
+      letter-spacing: .03em;
+      font-weight: 800;
     }
 
-    form {
-      margin: 1.5rem 0;
-      text-align: center;
+    .subtle {
+      margin: .2rem 0 0 0;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .theme {
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel);
+      padding: .4rem .9rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--fg);
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      box-shadow: 0 10px 30px rgba(15,23,42,0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .theme:hover {
+      border-color: var(--primary);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      padding: 1.1rem 1.2rem;
+      margin-top: 1rem;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    form.panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: nowrap;
     }
 
     input[type="file"] {
-      padding: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: .6rem .8rem;
+      border-radius: 14px;
+      border: 1px dashed var(--panel-border);
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      color: var(--fg);
+      font-size: .9rem;
     }
 
-    button {
-      padding: 0.5rem 1.2rem;
-      background-color: #0078d7;
-      border: none;
-      border-radius: 5px;
+    button[type="submit"] {
+      background: var(--primary);
       color: white;
-      font-weight: bold;
+      padding: .65rem 1.3rem;
+      border-radius: 999px;
+      border: 0;
       cursor: pointer;
-      margin-left: 10px;
+      font-weight: 700;
+      font-size: .95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      box-shadow: 0 14px 30px rgba(37,99,235,0.35);
+      white-space: nowrap;
     }
 
-    button:hover {
-      background-color: #005fa3;
+    .notice {
+      margin-top: 1rem;
+      padding: .8rem 1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(239,68,68,0.35);
+      background: rgba(254,242,242,0.85);
+      color: #991b1b;
+      font-size: .9rem;
+    }
+
+    .tabs {
+      display: inline-flex;
+      padding: .25rem;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      border: 1px solid rgba(148,163,184,0.35);
+      margin-top: 1.3rem;
+    }
+
+    .tab {
+      padding: .4rem .9rem;
+      border-radius: 999px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .tab.active {
+      background: var(--panel);
+      color: var(--fg);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(15,23,42,0.12);
+    }
+
+    .tabcontent {
+      margin-top: .9rem;
+      border-radius: 18px;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      padding: 1.1rem 1.2rem;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      opacity: 0;
+      transform: translateY(6px);
+      max-height: 0;
+      overflow: hidden;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease, max-height .22s ease;
+    }
+
+    .tabcontent.active {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 1200px;
+      pointer-events: auto;
     }
 
     pre {
-      background: #f4f4f4;
+      background: var(--pre-bg);
+      color: var(--pre-fg);
+      border: 1px solid var(--pre-border);
       padding: 1rem;
+      border-radius: 14px;
       white-space: pre-wrap;
-      max-height: 600px;
+      overflow: auto;
+      max-height: 60vh;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .9rem;
+      line-height: 1.45;
+    }
+
+    .err {
+      color: var(--error-text);
+      font-weight: 700;
+    }
+
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-bg);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border-radius: 999px;
+      border: 5px solid rgba(255,255,255,0.35);
+      border-top-color: #ffffff;
+      animation: spin .7s linear infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .download-button {
+      margin-bottom: .6rem;
+      padding: .5rem .95rem;
+      border-radius: 999px;
+      background: var(--primary);
+      color: white;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      box-shadow: 0 12px 26px rgba(37,99,235,0.35);
+    }
+
+    
+    #xPopupOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;           /* standard: dold; visas via inline-style */
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 20px;
+    }
+
+    #xPopupBox {
+      background: var(--panel);
+      color: var(--fg);
+      border-radius: 16px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 85vh;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+      overflow: auto;
+    }
+
+    pre.xpopup-lines {
+      background: var(--pre-bg);
+      border: 1px solid var(--pre-border);
+      padding: 10px;
+      border-radius: 10px;
+      max-height: 60vh;
       overflow-y: auto;
-      border-radius: 8px;
-      font-size: 0.95rem;
-    }
-
-    .error {
-      color: #b00020;
-      background-color: #ffe5e5;
-      border-left: 5px solid #b00020;
-      padding: 0.7rem;
-      margin-top: 1rem;
-    }
-
-    .section {
-      margin-top: 1.8rem;
-    }
-
-    .highlight-error {
-      color: #b00020;
-      font-weight: bold;
-    }
-
-    .highlight-warning {
-      color: #ff8c00;
-      font-weight: bold;
-    }
-
-    .highlight-success {
-      color: #008000;
-      font-weight: bold;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      color: #666;
-      font-size: 0.9rem;
+      white-space: pre-wrap;
+      font-size: .85rem;
     }
   </style>
+
   <script>
-    // Färglägg loggrader med nyckelord (client-side)
-    function highlightLogs() {
-      const preBlocks = document.querySelectorAll("pre");
-      preBlocks.forEach(block => {
-        block.innerHTML = block.innerHTML
-          .replace(/(Exception|Error|Fail|Crash|ANR)/gi, '<span class="highlight-error">$1</span>')
-          .replace(/(Success|Completed|OK)/gi, '<span class="highlight-success">$1</span>')
-          .replace(/(Warning|Timeout)/gi, '<span class="highlight-warning">$1</span>');
-      });
+    (function() {
+      try {
+        const saved = localStorage.getItem("theme");
+        if (saved === "dark") document.body.classList.add("dark");
+      } catch {}
+    })();
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle("dark");
+      try { localStorage.setItem("theme", isDark ? "dark" : "light"); } catch {}
     }
 
-    document.addEventListener("DOMContentLoaded", highlightLogs);
+    function showLoading() {
+      const overlay = document.getElementById("loadingOverlay");
+      if (overlay) overlay.style.display = "flex";
+    }
+
+    function openTab(name) {
+      const tabs = document.querySelectorAll(".tab");
+      const contents = document.querySelectorAll(".tabcontent");
+      tabs.forEach(t => t.classList.remove("active"));
+      contents.forEach(c => c.classList.remove("active"));
+      const tab = document.getElementById("tab-" + name);
+      const content = document.getElementById(name);
+      if (tab && content) {
+        tab.classList.add("active");
+        requestAnimationFrame(() => content.classList.add("active"));
+      }
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function highlightErrors(text) {
+      const safe = escapeHtml(text);
+      return safe.replace(/(Exception|Error|Fail|Crash|ANR)/gi, '<span class="err">$1</span>');
+    }
+
+    function initHighlight() {
+      const pre = document.getElementById("localResult");
+      if (!pre) return;
+      const raw = pre.textContent || "";
+      pre.innerHTML = highlightErrors(raw);
+    }
+
+    function downloadLlama() {
+      const pre = document.getElementById("geminiResult");
+      if (!pre) return;
+      const text = pre.textContent || "";
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "llama_sammanfattning.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadGemini() {
+      const pre = document.getElementById("geminiResult");
+      if (!pre) return;
+      const text = pre.textContent || "";
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "gemini_sammanfattning.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function setupDownloadButtons() {
+      const pre = document.getElementById("geminiResult");
+      const llamaBtn = document.getElementById("btnDownloadLlama");
+      const geminiBtn = document.getElementById("btnDownloadGemini");
+      if (!pre || !llamaBtn || !geminiBtn) return;
+
+      const txt = pre.textContent || "";
+      llamaBtn.style.display = "none";
+      geminiBtn.style.display = "none";
+
+      if (txt.includes("LLaMA (lokal via Ollama)")) {
+        llamaBtn.style.display = "inline-flex";
+      } else if (txt.includes("Gemini (moln)")) {
+        geminiBtn.style.display = "inline-flex";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", initHighlight);
+    document.addEventListener("DOMContentLoaded", setupDownloadButtons);
   </script>
 </head>
 
 <body>
-  <button class="btn btn-outline-secondary theme-toggle" id="themeToggle">🌙 Mörkt läge</button>
 
-  <div class="container py-5">
-    <div class="text-center mb-5">
-      <h1 class="fw-bold text-primary">AI Logganalys</h1>
-      <p class="text-muted">
-        Ladda upp en Android-loggfil (.txt / .log) för att analysera den med regex, spaCy och Gemini.
-      </p>
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  Analyserar loggen...
+</div>
+
+<div id="xPopupOverlay" {% if show_x_popup %}style="display:flex"{% endif %}>
+  <div id="xPopupBox">
+    <button style="
+      float:right;
+      background: var(--primary);
+      color:white;
+      border:none;
+      padding:6px 12px;
+      border-radius:10px;
+      cursor:pointer;
+    " onclick="document.getElementById('xPopupOverlay').style.display='none';">
+      Stäng
+    </button>
+    <h2>Felrader utan loggnivå (X)</h2>
+    <pre class="xpopup-lines">{{ x_entries_text }}</pre>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>AI Logganalys</h1>
+      <p class="subtle">Ladda upp en Android-loggfil för automatisk felsökning och AI-sammanfattning.</p>
+    </div>
+    <button class="theme" type="button" onclick="toggleTheme()">
+      <span>🌗</span><span>Tema</span>
+    </button>
+  </header>
+
+  <form class="panel" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+    <input type="file" name="logfile" required />
+
+    <!-- Filter: välj loggnivåer -->
+    <div style="display:flex; flex-direction:column; margin-top:8px; font-size:0.9rem; color:var(--muted);">
+      <label><b>Välj loggnivåer att visa:</b></label>
+      {% set sel = selected_levels or [] %}
+      <label><input type="checkbox" name="levels" value="E" {% if 'E' in sel %}checked{% endif %}> E (Error)</label>
+      <label><input type="checkbox" name="levels" value="W" {% if 'W' in sel %}checked{% endif %}> W (Warning)</label>
+      <label><input type="checkbox" name="levels" value="I" {% if 'I' in sel %}checked{% endif %}> I (Info)</label>
+      <label><input type="checkbox" name="levels" value="D" {% if 'D' in sel %}checked{% endif %}> D (Debug)</label>
+      <label><input type="checkbox" name="levels" value="V" {% if 'V' in sel %}checked{% endif %}> V (Verbose)</label>
     </div>
 
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <div class="card p-4 bg-body">
-          <form method="POST" enctype="multipart/form-data" class="text-center">
-            <div class="mb-3">
-              <input type="file" name="logfile" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">
-              🔍 Analysera loggfil
-            </button>
-          </form>
-
-          {% if error %}
-          <div class="alert alert-danger mt-4" role="alert">
-            <strong>Fel:</strong> {{ error }}
-          </div>
-          {% endif %}
-        </div>
-      </div>
+    <!-- Välj analysmotor -->
+    <div style="display:flex; flex-direction:column; margin-top:8px; font-size:0.9rem; color:var(--muted);">
+      <label><b>Välj analysmotor:</b></label>
+      <label><input type="radio" name="model_choice" value="llama" checked> LLaMA (lokal)</label>
+      <label><input type="radio" name="model_choice" value="gemini"> Gemini (moln)</label>
     </div>
 
-    {% if result_local %}
-    <div class="mt-5">
-      <h2 class="text-secondary">🧠 Resultat (lokal analys)</h2>
-      <pre>{{ result_local }}</pre>
-    </div>
-    {% endif %}
+    <button type="submit">Analysera</button>
+  </form>
 
-    {% if result_gemini %}
-    <div class="mt-5">
-      <h2 class="text-secondary">🤖 Gemini-sammanfattning</h2>
-      <pre>{{ result_gemini }}</pre>
-    </div>
-    {% endif %}
+  {% if error %}
+  <div class="notice">
+    <strong>Notis:</strong> {{ error }}
+  </div>
+  {% endif %}
+
+  {% if result_local or result_gemini %}
+  <div class="tabs">
+    <button class="tab active" id="tab-local" type="button" onclick="openTab('local')">Lokal analys</button>
+    <button class="tab" id="tab-gemini" type="button" onclick="openTab('gemini')">AI-sammanfattning</button>
   </div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <section id="local" class="tabcontent active">
+    <h2>Lokal analys</h2>
+    <pre id="localResult">{{ result_local }}</pre>
+  </section>
 
-  <!-- 🌙 Dark mode toggle -->
-  <script>
-    const toggleButton = document.getElementById('themeToggle');
-    const body = document.body;
+  <section id="gemini" class="tabcontent">
+    <h2>AI-sammanfattning</h2>
 
-    // Ladda användarens tidigare val
-    if (localStorage.getItem('theme') === 'dark') {
-      body.classList.add('dark-theme');
-      toggleButton.textContent = '☀️ Ljust läge';
-    }
+    <div style="display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.6rem;">
+      <button id="btnDownloadLlama" class="download-button" type="button" onclick="downloadLlama()">
+        ⬇ Ladda ner LLaMA-sammanfattning
+      </button>
+      <button id="btnDownloadGemini" class="download-button" type="button" onclick="downloadGemini()">
+        ⬇ Ladda ner Gemini-sammanfattning
+      </button>
+    </div>
 
-    toggleButton.addEventListener('click', () => {
-      body.classList.toggle('dark-theme');
-      const isDark = body.classList.contains('dark-theme');
-      toggleButton.textContent = isDark ? '☀️ Ljust läge' : '🌙 Mörkt läge';
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-  </script>
+    <pre id="geminiResult">{{ result_gemini }}</pre>
+  </section>
+  {% endif %}
+</div>
+
 </body>
 </html>

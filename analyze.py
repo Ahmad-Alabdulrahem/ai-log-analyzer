@@ -16,8 +16,8 @@ def analyze_with_gemini(log_text: str) -> str:
     genai.configure(api_key=API_KEY)
 
     models_to_try = [
-        "models/gemini-2.5-flash",  # Fast and reliable
-        "models/gemini-2.5-pro"     # More detailed fallback
+        "models/gemini-2.5-flash",  
+        "models/gemini-2.5-pro"     
     ]
 
     last_error = None
